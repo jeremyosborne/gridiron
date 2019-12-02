@@ -1,0 +1,77 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Set our test page to be "full window" */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+/* Constrain the application to the available view. */
+#gridiron-app {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  width: 100%;
+}
+
+.gridiron-img-preloader {
+  left: -9000px;
+  position: fixed;
+  top: -9000px;
+}
+
+/* Map floats in the middle. */
+#gridiron-map {
+  align-items: center;
+  background: rgb(222,222,222);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  /* Allows absolute positioning of controls within the map area. */
+  position: relative;
+  width: 100%;
+}
+
+#gridiron-map-gridlines-x {
+  height: 32px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.gridiron-gridline-x {
+  background-color: rgb(0,0,0);
+  position: absolute;
+  top: 0;
+  width: 5px;
+
+  touch-action: none;
+  user-select: none;
+  transform: translate(0px, 0px);
+}
+
+#gridiron-map-gridlines-y {
+  bottom: 0;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  width: 32px;
+}
+.gridiron-gridline-y {
+  background-color: rgb(121,121,121);
+  height: 5px;
+  position: absolute;
+  right: 0;
+
+  touch-action: none;
+  user-select: none;
+  transform: translate(0px, 0px);
+}
+
+#gridiron-map-image {
+  display: block;
+  height: 100%;
+  width: 100%;
+}

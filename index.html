@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head lang="en">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gridiron</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css" />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <div id="gridiron-app">
+      <form id="gridiron-image-loader">
+        <input id="gridiron-image-loader-src" name="gridiron-image-loader-src" type="url" placeholder="http://your.image.url" />
+        <button id="gridiron-image-loader-submit" type="submit">load</button>
+      </form>
+      <div id="gridiron-map">
+        <div id="gridiron-map-gridlines-x"></div>
+        <div id="gridiron-map-gridlines-y"></div>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" id="gridiron-map-image"/>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/ky@0.16.1/umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs@1.7.2/dist/interact.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
