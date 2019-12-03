@@ -64,8 +64,21 @@ html, body {
   transform: translate(0px, 0px);
 }
 
+#gridiron-map-image-containers {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
 #gridiron-map-image {
   display: block;
   height: 100%;
   width: 100%;
+}
+
+#gridirion-map-image-loading {
+  display: none;
+  font-size: 2rem;
 }
