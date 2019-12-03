@@ -92,7 +92,7 @@
     // with signature `callback(error)`.
     // Handles loading message in UI.
     const load = function (src, callback) {
-      const loadingMessage = document.querySelector('#gridirion-map-image-loading')
+      const loadingMessage = document.querySelector('#gridiron-map-image-loading')
       const img = document.querySelector('#gridiron-map-image')
 
       // Loading in process.
@@ -111,15 +111,37 @@
         // Loading done.
         loadingMessage.style.display = 'none'
         img.style.display = 'block'
-        callback(null)
+        img.onload = function () {
+          callback(null)
+        }
       })
     }
     exports.image.load = load
 
     // What are the dimensions of the loaded map image?
     const dimensions = function () {
-      const el = document.querySelector('#gridiron-map')
-      return {height: el.offsetHeight, width: el.offsetWidth}
+      const mapContainer = document.querySelector('#gridiron-map-image-container')
+      const mapImage = document.querySelector('#gridiron-map-image')
+
+      return {
+        // Height and width for determining basic number of gridlines.
+        height: mapImage.offsetHeight,
+        width: mapImage.offsetWidth,
+
+        // Determines full size of gridlines (they cut across the container)/
+        container: {
+          height: mapContainer.offsetHeight,
+          width: mapContainer.offsetWidth,
+        },
+
+        // We ASSUME (danger danger) that image is center, or at least constrained
+        // and that we'll need to offset the gridlines via math magic.
+        offset: {
+          // left, aka. x
+          x: (mapContainer.offsetWidth - mapImage.offsetWidth) / 2,
+          y: (mapContainer.offsetHeight - mapImage.offsetHeight) / 2,
+        }
+      }
     }
     exports.image.dimensions = dimensions
   })(gridiron);
@@ -167,21 +189,20 @@
     // axis is `x` or `y`
     const renderGridlines = function (axis) {
       const dims = gridiron.image.dimensions()
+      // We only need only enough gridlines to cover the image.
       const offset = axis === 'x' ? dims.width : dims.height
-      const gridlineLength = axis === 'x' ? dims.height : dims.width
+      // Length of gridline cuts across entire container.
+      const gridlineLength = axis === 'x' ? dims.container.height : dims.container.width
+      // Container here is the container of the gridlines, not the map container.
       const container = document.querySelector('#gridiron-map-gridlines-' + axis)
       const num = Math.floor(offset / MIN_DEFAULT_DISTANCE)
-      for (let i = 1; i < num; i++) {
+      // Grid contains start and end boundaries.
+      for (let i = 0; i < num + 1; i++) {
         const gridline = document.createElement('div')
         gridline.className = 'gridiron-gridline-' + axis
         // Dynamically set height since gridline is child of a positioned container.
-        if (axis === 'x') {
-          gridline.style.height = gridlineLength + 'px'
-          gridline.style.left = (i * MIN_DEFAULT_DISTANCE) + 'px'
-        } else {
-          gridline.style.width = gridlineLength + 'px'
-          gridline.style.top = (i * MIN_DEFAULT_DISTANCE) + 'px'
-        }
+        gridline.style[axis === 'x' ? 'height' : 'width'] = gridlineLength + 'px'
+        gridline.style[axis === 'x' ? 'left' : 'top'] = (dims.offset[axis] + i * MIN_DEFAULT_DISTANCE) + 'px'
         container.appendChild(gridline)
       }
     }
