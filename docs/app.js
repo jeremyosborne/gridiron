@@ -1,124 +1,107 @@
-// Image loader (form) for the prototype.
+/* global interact */
 (function () {
-  // Development/debug
-  document.querySelector('#gridiron-image-loader-src').value = 'http://placekitten.com/800/600'
-  document.querySelector('#gridiron-image-loader').addEventListener('submit', function (e) {
-    e.preventDefault()
+  // Gridiron internals as old fashioned invoke immediate function.
 
-    const src = this.querySelector('#gridiron-image-loader-src').value
-    if (src) {
-      const preloader = document.createElement('img')
-      preloader.src = src
-      preloader.className = 'gridiron-preloader'
-      // Good enough job of determining dimensions.
-      preloader.onload = function () {
-        const img = document.querySelector('#gridiron-map-image')
-        img.src = src
-        img.style.maxHeight = this.height + "px"
-        img.style.maxWidth = this.width + "px"
+  // Async load an image from URI `src` and invokes callback with signature
+  // callback(error, ImgElement) when done.
+  const imagePreloader = function (src, callback) {
+    const preloader = document.createElement('img')
+    preloader.src = src
+    preloader.style.left = '-9000px'
+    preloader.style.position = 'fixed'
+    preloader.style.top = '-9000px'
+    // Good enough job of determining dimensions.
+    preloader.onload = function () {
+      callback(null, this)
+    }
+  };
+
+  // Grid controllers for the prototype.
+  (function () {
+    // Pixels between gridlines...
+    const MIN_DEFAULT_DISTANCE = 100
+
+    // Get dimensions of the container. For prototype, ignore browser resize and zoom.
+    const mapDimensions = function () {
+      const el = document.querySelector('#gridiron-map')
+      return {height: el.offsetHeight, width: el.offsetWidth}
+    }
+
+    // axis is `x` or `y`
+    const draggableGridlines = function (axis) {
+      interact('.gridiron-gridline-' + axis).draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent',
+            endOnly: true,
+          })
+        ],
+        autoScroll: true,
+        onmove: function (event) {
+          var target = event.target
+          var location = (parseFloat(target.getAttribute('data-' + axis)) || 0) + event['d' + axis]
+
+          // translate the element
+          target.style.webkitTransform =
+            target.style.transform =
+              'translate' + axis.toUpperCase() + '(' + location + 'px)'
+
+          // update the posiion attributes in `data-x` or `data-y`
+          target.setAttribute('data-' + axis, location)
+        }
+      })
+    }
+
+    // axis is `x` or `y`
+    const renderGridlines = function (axis) {
+      const dims = mapDimensions()
+      const offset = axis === 'x' ? dims.width : dims.height
+      const gridlineLength = axis === 'x' ? dims.height : dims.width
+      const container = document.querySelector('#gridiron-map-gridlines-' + axis)
+      const num = Math.floor(offset / MIN_DEFAULT_DISTANCE)
+      for (let i = 1; i < num; i++) {
+        const gridline = document.createElement('div')
+        gridline.className = 'gridiron-gridline-' + axis
+        // Dynamically set height since gridline is child of a positioned container.
+        if (axis === 'x') {
+          gridline.style.height = gridlineLength + 'px'
+          gridline.style.left = (i * MIN_DEFAULT_DISTANCE) + 'px'
+        } else {
+          gridline.style.width = gridlineLength + 'px'
+          gridline.style.top = (i * MIN_DEFAULT_DISTANCE) + 'px'
+        }
+        container.appendChild(gridline)
       }
     }
-  }, false)
-})();
+    renderGridlines('x')
+    draggableGridlines('x')
 
-// Grid controllers for the prototype.
-(function () {
-  // Pixels between gridlines...
-  const MIN_DEFAULT_DISTANCE = 100
+    renderGridlines('y')
+    draggableGridlines('y')
+  })();
 
-  // Get dimensions of the container. For prototype, ignore browser resize and zoom.
-  const mapDimensions = function () {
-    const el = document.querySelector('#gridiron-map')
-    return {height: el.offsetHeight, width: el.offsetWidth}
-  }
+  // Image loader (form) for the prototype.
+  (function () {
+    // Development/debug
+    document.querySelector('#gridiron-image-loader-src').value = 'http://placekitten.com/800/600'
 
-  // Constrain this to the actual image, for now use the container.
-  const renderGridlinesForX = function () {
-    const dims = mapDimensions()
-    const distance = dims.width
-    const gridlineLength = dims.height
-    const container = document.querySelector('#gridiron-map-gridlines-x')
-    const num = Math.floor(distance / MIN_DEFAULT_DISTANCE)
-    for (let i = 1; i < num; i++) {
-      const gridline = document.createElement('div')
-      gridline.className = 'gridiron-gridline-x'
-      // Dynamically set height since gridline is child of a positioned container.
-      gridline.style.height = gridlineLength + 'px'
-      gridline.style.left = (i * MIN_DEFAULT_DISTANCE) + 'px'
-      container.appendChild(gridline)
-    }
-  }
-  renderGridlinesForX()
-  interact('.gridiron-gridline-x').draggable({
-    inertia: true,
-    modifiers: [
-      interact.modifiers.restrictRect({
-        // Due to the sizing of the element, restricting to parent does the
-        // constraint we want.
-        restriction: 'parent',
-        endOnly: true
-      })
-    ],
-    autoScroll: true,
-    onmove: function (event) {
-      var target = event.target
-      // keep the dragged position in the data-x/data-y attributes
-      var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-      var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+    document.querySelector('#gridiron-image-loader').addEventListener('submit', function (e) {
+      e.preventDefault()
 
-      // translate the element
-      target.style.webkitTransform =
-        target.style.transform =
-          'translate(' + x + 'px, ' + y + 'px)'
-
-      // update the posiion attributes
-      target.setAttribute('data-x', x)
-      target.setAttribute('data-y', y)
-    }
-  })
-
-  const renderGridlinesForY = function () {
-    const dims = mapDimensions()
-    const distance = dims.height
-    const gridlineLength = dims.width
-    const container = document.querySelector('#gridiron-map-gridlines-y')
-    const num = Math.floor(distance / MIN_DEFAULT_DISTANCE)
-    for (let i = 1; i < num; i++) {
-      const gridline = document.createElement('div')
-      gridline.className = 'gridiron-gridline-y'
-      // Dynamically set height since gridline is child of a positioned container.
-      gridline.style.width = gridlineLength + 'px'
-      gridline.style.top = (i * MIN_DEFAULT_DISTANCE) + 'px'
-      container.appendChild(gridline)
-    }
-  }
-  renderGridlinesForY()
-  interact('.gridiron-gridline-y').draggable({
-    inertia: true,
-    modifiers: [
-      interact.modifiers.restrictRect({
-        // Due to the sizing of the element, restricting to parent does the
-        // constraint we want.
-        restriction: 'parent',
-        endOnly: true
-      })
-    ],
-    autoScroll: true,
-    onmove: function (event) {
-      var target = event.target
-      // keep the dragged position in the data-x/data-y attributes
-      var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-      var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
-
-      // translate the element
-      target.style.webkitTransform =
-        target.style.transform =
-          'translate(' + x + 'px, ' + y + 'px)'
-
-      // update the posiion attributes
-      target.setAttribute('data-x', x)
-      target.setAttribute('data-y', y)
-    }
-  })
-
-})();
+      const src = this.querySelector('#gridiron-image-loader-src').value
+      if (src) {
+        imagePreloader(src, function (error, preloaded) {
+          if (error) {
+            // Shouldn't actually get here.
+            throw error
+          }
+          const img = document.querySelector('#gridiron-map-image')
+          img.src = src
+          img.style.maxHeight = preloaded.height + 'px'
+          img.style.maxWidth = preloaded.width + 'px'
+        })
+      }
+    }, false)
+  })()
+})()

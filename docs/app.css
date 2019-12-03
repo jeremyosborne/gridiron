@@ -16,12 +16,6 @@ html, body {
   width: 100%;
 }
 
-.gridiron-img-preloader {
-  left: -9000px;
-  position: fixed;
-  top: -9000px;
-}
-
 /* Map floats in the middle. */
 #gridiron-map {
   align-items: center;

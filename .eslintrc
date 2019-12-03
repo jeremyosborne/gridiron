@@ -1,0 +1,31 @@
+{
+  "extends": ["standard"],
+  "parser": "babel-eslint",
+  "plugins": [
+    "import",
+  ],
+  "rules": {
+    "comma-dangle": ["error", "only-multiline"],
+    "import/no-unresolved": ["error"],
+    "indent": ["error", 2, {
+      "SwitchCase": 1,
+    }],
+    "object-curly-spacing": ["error", "never"],
+    // Editor and eslint rules are fighting in the JSX autoformatting.
+    "operator-linebreak": ["off"],
+    "react/prop-types": ["off"],
+    "yoda": ["off"],
+  },
+  "settings": {
+    "import/extensions": [".js", ".jsx"],
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx"],
+        "moduleDirectory": [
+          "node_modules",
+          "src",
+        ],
+      },
+    },
+  },
+}
