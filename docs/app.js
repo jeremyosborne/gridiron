@@ -181,19 +181,25 @@
     exports.image.dimensions = dimensions
   })(gridiron);
 
-  // Grid controllers for the prototype.
+  //
+  // Deal with various aspects of the gridlines overlain on the image.
+  //
   (function (exports) {
-    // Clears any existing gridlines.
-    const clear = function () {
-      const nodes = document.querySelectorAll('[class*="gridiron-gridline"]')
+    exports.gridlines = {}
+
+    // Clears gridlines on a specific axis.
+    // `axis: string` is `x` or `y`
+    const clear = function (axis) {
+      const nodes = document.querySelectorAll('.gridiron-gridline-' + axis)
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
         node.parentNode.removeChild(node)
       }
     }
 
-    // axis is `x` or `y`
-    const draggableGridlines = function (axis) {
+    // Make an axis of gridlines draggable.
+    // `axis: string` is `x` or `y`
+    const makeDraggable = function (axis) {
       interact('.gridiron-gridline-' + axis).draggable({
         inertia: true,
         modifiers: [
@@ -219,12 +225,14 @@
     }
 
     //
+    // Draw a set of griddlines.
+    //
     // `axis: string` is `x` or `y`
     // `num: number` is integer value of how many gridlines to draw on the image
     // if included, or if not included lets the app decide a default number of
     // gridlines.
     //
-    // TODO: Switch to default num? 6 gridlines?
+    // TODO: Switch to default num vs. default spacing? 6 gridlines?
     //
     const renderGridlines = function (axis, num) {
       const dims = gridiron.image.dimensions()
@@ -234,17 +242,22 @@
       // Calculate number of gridlines and the space between them.
       let distanceBetweenGridlines = 100
       if (!num) {
-        // Assume default distance, calculate default number of gridlines.
-        num = Math.floor(imageWidth / distanceBetweenGridlines)
-      } else {
+        // Assume default distance, calculate default number of gridlines
+        // and include end boundary.
+        num = Math.floor(imageWidth / distanceBetweenGridlines) + 1
+      } else if (num > 0) {
         // Fit all of the requested gridlines in as best as possible.
-        distanceBetweenGridlines = Math.floor(imageWidth / num)
+        // When using number of gridlines, it includes boundaries, so space
+        // accordingly.
+        distanceBetweenGridlines = Math.floor(imageWidth / (num - 1))
+      } else {
+        // no causing blackholes by dividing by zero.
+        return
       }
 
       // Gridline container that will hold our gridlines.
       const container = document.querySelector('#gridiron-map-gridlines-' + axis)
-      // Grid contains start and end boundaries.
-      for (let i = 0; i < num + 1; i++) {
+      for (let i = 0; i < num; i++) {
         const gridline = document.createElement('div')
         gridline.className = 'gridiron-gridline-' + axis
         // Dynamically set height since gridline is child of a positioned container.
@@ -254,17 +267,59 @@
       }
     }
 
-    // External API.
-    exports.renderGridlines = function () {
+    // What should a particular control do when clicked?
+    //
+    // `axis: string` is `x` or `y`
+    // `action: string` is `+` or `-`
+    const controlClickHandlerFactory = function (axis, action) {
+      return function (e) {
+        // How many items exist on the current axis?
+        const gridlines = document.querySelectorAll('.gridiron-gridline-' + axis)
+        const num = gridlines ? gridlines.length : 0
+        const newNum = action === '+' ? num + 1 : num - 1
+        if (newNum > 1) {
+          clear(axis)
+          renderGridlines(axis, newNum)
+          makeDraggable(axis)
+        }
+      }
+    }
+
+    //
+    // Called to disable controls and set up event listeners when the application
+    // is ready to be used.
+    //
+    const controlsInit = function () {
+      const controls = document.querySelectorAll('.gridiron-control-gridline')
+
+      for (let i = 0; i < controls.length; i++) {
+        const control = controls[i]
+        // Add event handlers based on data.
+        const axis = control.getAttribute('data-axis')
+        const action = control.getAttribute('data-action')
+        control.addEventListener('click', controlClickHandlerFactory(axis, action), false)
+
+        // Enable the control.
+        control.removeAttribute('disabled')
+      }
+    }
+    exports.gridlines.controlsInit = controlsInit
+
+    //
+    // Perform a full (re)render of the gridlines based on default settings.
+    //
+    const render = function () {
       // Remove existing gridlines, in case this gets called multiple times.
-      clear()
+      clear('x')
+      clear('y')
 
       renderGridlines('x')
-      draggableGridlines('x')
+      makeDraggable('x')
 
       renderGridlines('y')
-      draggableGridlines('y')
+      makeDraggable('y')
     }
+    exports.gridlines.render = render
   })(gridiron)
 
   // int main(void), which for this is managed by the form in the page.
@@ -277,15 +332,17 @@
         callback(null, data.mapURI)
       },
       gridiron.image.load,
-      gridiron.renderGridlines,
     ], {
       // Let it throw for now. If errors become a problem, which they will
       // with HTTP, we should notify with a problem.
       // error: function (error) {console.log('you haz error:', error)},
       //
-      // We don't need done, since the final function in the queue doesn't
-      // return anything we need.
-      // done: function (data) {console.log('you haz data:', data)},
+      // Final setup is UI and sync, avoid making them callbacks.
+      done: function () {
+        // Maybe combine render and controlsInit into an `init` or `firstRender`.
+        gridiron.gridlines.render()
+        gridiron.gridlines.controlsInit()
+      },
     })
     // Originally had the idea of passing in some data, but not needed at the
     // moment. Kick off the task queue.
