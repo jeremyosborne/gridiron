@@ -9,7 +9,8 @@
   },
   "author": "Jeremy Osborne <jeremywosborne@gmail.com>",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
@@ -18,9 +19,7 @@
     "@babel/preset-flow": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
     "babel-eslint": "^10.0.3",
-    "babel-plugin-lodash": "^3.3.4"
-  },
-  "devDependencies": {
+    "babel-plugin-lodash": "^3.3.4",
     "eslint": "^6.7.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",
