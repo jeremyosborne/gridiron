@@ -45,6 +45,23 @@ html, body {
   user-select: none;
   transform: translate(0px, 0px);
 }
+.gridirion-gridline-x-label {
+  background-color: white;
+
+  font-size: 0.8rem;
+
+  position: absolute;
+  top: 5px;
+
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  border-radius: 100%;
+  height: 32px;
+  transform: translateX(-50%);
+  width: 32px;
+}
 
 #gridiron-map-gridlines-y {
   bottom: 0;
@@ -62,6 +79,23 @@ html, body {
   touch-action: none;
   user-select: none;
   transform: translate(0px, 0px);
+}
+.gridirion-gridline-y-label {
+  background-color: white;
+
+  font-size: 0.8rem;
+
+  position: absolute;
+  right: 5px;
+
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  border-radius: 100%;
+  height: 32px;
+  transform: translateY(-50%);
+  width: 32px;
 }
 
 #gridiron-map-image-container {

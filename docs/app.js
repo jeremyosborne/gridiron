@@ -190,10 +190,53 @@
     // Clears gridlines on a specific axis.
     // `axis: string` is `x` or `y`
     const clear = function (axis) {
-      const nodes = document.querySelectorAll('.gridiron-gridline-' + axis)
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i]
-        node.parentNode.removeChild(node)
+      const gridlines = document.querySelectorAll('.gridiron-gridline-' + axis)
+      for (let i = 0; i < gridlines.length; i++) {
+        const gridline = gridlines[i]
+        gridline.parentNode.removeChild(gridline)
+      }
+    }
+
+    //
+    // Label the existing gridlines.
+    //
+    // `axis: string` is `x` or `y`
+    //
+    const label = function (axis) {
+      const gridlines = document.querySelectorAll('.gridiron-gridline-' + axis)
+
+      // Sort into visual display order, not DOM hierarchy order,
+      const sortedGridlines = Array.prototype.slice.call(gridlines).sort(function (a, b) {
+        const aPos = a.getBoundingClientRect()[axis === 'x' ? 'left' : 'top']
+        const bPos = b.getBoundingClientRect()[axis === 'x' ? 'left' : 'top']
+
+        if (aPos < bPos) {
+          return -1
+        }
+        if (aPos > bPos) {
+          return 1
+        }
+        return 0
+      })
+
+      for (let i = 0; i < sortedGridlines.length; i++) {
+        const gridline = sortedGridlines[i]
+        const labelClassName = 'gridirion-gridline-' + axis + '-label'
+        let label = gridline.querySelector('.' + labelClassName)
+        if (!label) {
+          // First label.
+          label = document.createElement('div')
+          label.className = labelClassName
+          gridline.appendChild(label)
+        }
+
+        if (axis === 'x') {
+          // Label with human friendly numbers.
+          label.innerHTML = i + 1
+        } else {
+          // Assume 'y', label with letters.
+          label.innerHTML = String.fromCharCode('a'.charCodeAt(0) + i)
+        }
       }
     }
 
@@ -220,7 +263,12 @@
 
           // update the posiion attributes in `data-x` or `data-y`
           target.setAttribute('data-' + axis, location)
-        }
+        },
+        onend: function () {
+          // Relable, axis since the gridlines are not restricted from crossing
+          // over each other.
+          label(axis)
+        },
       })
     }
 
@@ -280,6 +328,7 @@
         if (newNum > 1) {
           clear(axis)
           renderGridlines(axis, newNum)
+          label(axis)
           makeDraggable(axis)
         }
       }
@@ -314,9 +363,11 @@
       clear('y')
 
       renderGridlines('x')
+      label('x')
       makeDraggable('x')
 
       renderGridlines('y')
+      label('y')
       makeDraggable('y')
     }
     exports.gridlines.render = render
