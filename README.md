@@ -20,4 +20,3 @@ python -m SimpleHTTPServer 8000
 - [X] Bug: labeling needs to sort then label based on actual offset + dragging transform (stored in html data- attr).
 - [ ] Bug: dragging is messed up when adding/subtracting gridlines. Maybe unregister events?
 - [ ] Write as an interim JSON dump to console.
-- [ ] Add in jquery.ajax for requests.
