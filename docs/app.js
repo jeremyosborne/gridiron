@@ -242,6 +242,11 @@
 
     // Make an axis of gridlines draggable.
     // `axis: string` is `x` or `y`
+    //
+    // Call this only one time per group of gridlines.
+    //
+    // interact.js (appears to) work through a single event pipeline, and
+    // multiple calls will cause some accelerated dragging.
     const makeDraggable = function (axis) {
       interact('.gridiron-gridline-' + axis).draggable({
         inertia: true,
@@ -329,7 +334,8 @@
           clear(axis)
           renderGridlines(axis, newNum)
           label(axis)
-          makeDraggable(axis)
+          // see notes on makeDraggable
+          // makeDraggable(axis)
         }
       }
     }

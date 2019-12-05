@@ -18,5 +18,5 @@ python -m SimpleHTTPServer 8000
     - [X] Relabel on drag (or constrain elements more better so no relabeling needed).
     - [X] Relabel on redraws.
 - [X] Bug: labeling needs to sort then label based on actual offset + dragging transform (stored in html data- attr).
-- [ ] Bug: dragging is messed up when adding/subtracting gridlines. Maybe unregister events?
+- [X] Bug: dragging is messed up when adding/subtracting gridlines. Maybe unregister events?
 - [ ] Write as an interim JSON dump to console.
